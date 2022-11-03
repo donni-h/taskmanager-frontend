@@ -1,0 +1,70 @@
+<!--
+<div *ngIf="task" class="w-full max-w-xs mx-auto flex flex-col items-center">
+  <h2 class="text-2xl font-bold tracking-wide text-center">Task Editor</h2>
+  <form class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+  <label class="block text-gray-700 text-sm font-bold mb-2">ID: {{task.id}}</label>
+    <div class="mb-4">
+  <label class="block text-gray-700 text-sm font-bold mb-2" for="task-title">Title: </label>
+  <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="task-title" [(ngModel)]="task.title" placeholder="title" name="title">
+    </div>
+    <div class="mb-4">
+      <label class="block text-gray-700 text-sm font-bold mb-2" for="task-desc">Description: </label>
+      <textarea class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="task-desc" [(ngModel)]="task.description" placeholder="description" name="description"></textarea>
+    </div>
+    <div class="mb-4">
+      <label class="block text-gray-700 text-sm font-bold mb-2" for="task-dueDate">Date: </label>
+      <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" [ngModel]="task.dueDate | date:'yyyy-MM-ddTHH:mm'" (ngModelChange)="task.dueDate = $event" type="datetime-local" name="dueDate" id="task-dueDate"/>
+    </div>
+    <label class="block text-gray-700 text-sm font-bold mb-2">People: </label>
+    <div class="mb-4" *ngFor="let resp of task.responsibilities">
+      <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id='task-{{resp.id}}' [(ngModel)]="task.title" placeholder="title" name="title">
+    </div>
+  </form>
+  <div>
+  <button class="btn" type="button" (click)="goBack()">go back</button>
+  <button class="btn ml-4" type="button" (click)="save()">save</button>
+  </div>
+</div>
+-->
+<div *ngIf="task" class="w-full max-w-xs mx-auto flex flex-col items-center">
+  <h2 class="text-2xl font-bold tracking-wide text-center">Task Editor</h2>
+<form [formGroup]="taskForm" class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+  <div class="mb-4">
+    <label for="title" class="block text-gray-700 text-sm font-bold mb-2">Title: </label>
+    <input id="title" type="text" formControlName="title" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+  </div>
+  <div class="mb-4">
+    <label for="desc" class="block text-gray-700 text-sm font-bold mb-2">Description: </label>
+    <textarea class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" formControlName="description" id="desc"></textarea>
+  </div>
+  <div class="mb-4 w-full">
+    <div class="form-group" *ngIf="hasStatus()">
+      <label class="block text-gray-700 text-sm font-bold mb-2">Status:  <span [ngClass]="getStatusStyle()" class="ml-4 badge w-64"></span></label>
+    </div>
+    <label for="due" class="block text-gray-700 text-sm font-bold mb-2"> Due Date: </label>
+    <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" value="controls['dueDate'].value" formControlName="dueDate" type="datetime-local" id="due"/>
+  </div>
+<div formArrayName="people">
+  <label class="block text-gray-700 text-sm font-bold mb-2">People: </label>
+  <div *ngFor="let resp of people.controls; let i = index">
+    <ng-container [formGroupName]="i">
+      <div class="flex items-center border-b border-teal-500 py-2">
+        <input type="text" placeholder="name" formControlName="name" class="appearance-none bg-transparent border-none w-full text-gray-700 mr-3 py-1 px-2 leading-tight focus:outline-none">
+        <input type="text" placeholder="email" formControlName="email" class="appearance-none bg-transparent border-none w-full text-gray-700 mr-3 py-1 px-2 leading-tight focus:outline-none">
+        <button class="flex-shrink-0 border-transparent border-4 text-red-500 hover:text-red-800 text-sm py-1 px-2 rounded" (click)="removeResponsibility(resp.value, i)">
+          Delete
+        </button>
+      </div>
+    </ng-container>
+  </div>
+  <div class="flex justify-center mt-6">
+    <button class="flex-shrink-0 bg-teal-500 hover:bg-teal-700 border-teal-500 hover:border-teal-700 text-sm border-4 text-white py-1 px-2 rounded" (click)="addResponsibility()">
+      Add
+    </button>
+  </div>
+</div>
+  <div class="flex justify-center mt-6">
+  <button (click)="onSubmit()" [disabled]="!taskForm.valid">Save Changes</button>
+  </div>
+</form>
+</div>
