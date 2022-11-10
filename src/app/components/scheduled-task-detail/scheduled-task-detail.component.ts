@@ -15,12 +15,20 @@ import {Recurrence} from "./Recurrence";
 })
 
 export class ScheduledTaskDetailComponent implements OnInit {
-  recurrences: Recurrence[] = [Recurrence.Daily, Recurrence.Weekly, Recurrence.Monthly, Recurrence.Yearly]
-  recurrence: Recurrence | undefined
+  recurrence!: Recurrence
+  isWorkDaily = false
   task!: ScheduledTask;
   taskForm!: FormGroup
   DAY = 86400000
   people!: FormArray
+  readonly max = 999;
+  readonly min = 1;
+  readonly weekdays = new Map<number, string>([[1, "Monday"], [2, "Tuesday"], [4, "Wednesday"], [8, "Thursday"], [16, "Friday"], [32, "Saturday"], [64, "Sunday"],])
+  readonly recurrences: Recurrence[] = [Recurrence.Daily, Recurrence.Weekly, Recurrence.Monthly, Recurrence.Yearly]
+  readonly specialLengths = ["First", "Second", "Third", "Fourth", "Last"]
+  readonly months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
+
+
   constructor(private taskService: ScheduledTaskService, private activatedRoute: ActivatedRoute, private location: Location, private router: Router, private formBuilder: FormBuilder) {
   }
 
@@ -28,20 +36,21 @@ export class ScheduledTaskDetailComponent implements OnInit {
     this.activatedRoute.paramMap.subscribe((params: ParamMap) => {
       if(params.get('id')==='add'){
         let date = new Date()
+
         this.task = {
           id: null,
           title: null,
           description: null,
-          unit: null,
-          start: null,
+          unit: Recurrence.Daily,
+          start: new Date(),
           end: null,
           repetitions: null,
           repetitionsLeft: null,
-          length: null,
+          length: 1,
           weekday: null,
           specialLength: null,
           month: null,
-          day: null,
+          day: 1,
           nextSchedule: null,
           tasks: [],
           responsibilities: [],
@@ -49,8 +58,11 @@ export class ScheduledTaskDetailComponent implements OnInit {
           createdAt: date,
           updatedAt: date
         }
+
+        this.recurrence = Recurrence.Daily
         this.createForm()
         this.people = this.responsibilities
+
         return
       }
     })
@@ -97,12 +109,33 @@ export class ScheduledTaskDetailComponent implements OnInit {
       title: new FormControl(this.task.title, [Validators.required, Validators.maxLength(45)]),
       description: new FormControl(this.task.description),
       people: this.formBuilder.array([]),
-      repetitions: new FormControl([Validators.max(999), Validators.min(1)])
+      repetitions: new FormControl([Validators.max(this.max), Validators.min(this.min)]),
+      recurrence: new FormControl(this.recurrence, Validators.required),
+      length: new FormControl(this.task.length, Validators.required),
+      weekday: new FormControl(this.task.weekday),
+      specialLength: new FormControl(this.task.specialLength),
+      month: new FormControl(this.task.month),
+      day: new FormControl(this.task.day),
+      start: new FormControl(this.task.start!.toISOString().slice(0,16), Validators.required),
+      end: new FormControl(this.task.end),
+      selection: new FormControl(true)
     })
   }
 
-  changeRecurrence(rec: Recurrence) {
+  onChangeRecurrence(rec: Recurrence) {
     this.recurrence = rec
-    console.log(typeof  this.recurrence)
+    this.resetSelection()
   }
+
+
+  resetSelection(){
+    this.taskForm.controls['specialLength'].setValue(null)
+    this.taskForm.controls['length'].setValue(1)
+    this.taskForm.controls['weekday'].setValue(this.task.weekday)
+    this.taskForm.controls['specialLength'].setValue(this.task.specialLength)
+    this.taskForm.controls['month'].setValue(this.task.month)
+    this.taskForm.controls['day'].setValue(this.task.day)
+    }
+
+
 }

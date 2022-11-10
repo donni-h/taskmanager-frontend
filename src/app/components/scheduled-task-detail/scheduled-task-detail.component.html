@@ -1,10 +1,9 @@
-
-<div *ngIf="task" class="w-full max-w-xs mx-auto flex flex-col items-center">
+<div *ngIf="task" class="w-full max-w-xs mx-auto flex flex-col items-center" xmlns="http://www.w3.org/1999/html">
   <h2 class="text-2xl font-bold tracking-wide text-center">Scheduled Task Editor</h2>
 <form [formGroup]="taskForm"  class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
   <div class="mb-4">
     <label for="title" class="block text-gray-700 text-sm font-bold mb-2">Title: </label>
-    <input id="title" type="text" formControlName="title" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+    <input id="title" type="text" formControlName="title" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
   </div>
   <div class="mb-4">
     <label for="desc" class="block text-gray-700 text-sm font-bold mb-2">Description: </label>
@@ -12,31 +11,72 @@
   </div>
   <div class="mb-4">
     <label for="due" class="block text-gray-700 text-sm font-bold mb-2"> Start: </label>
-    <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" type="datetime-local" id="due"/>
+    <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" formControlName="start" type="datetime-local" id="due"/>
   </div>
   <div class="mb-4">
     <label for="repetitions" class="block text-gray-700 text-sm font-bold mb-2">Repetitions: </label>
-    <input id="repetitions" type="number" formControlName="repetitions" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+    <input id="repetitions" type="number" formControlName="repetitions" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" [min]="min" [max]="max">
   </div>
   <label  class="block text-gray-700 text-sm font-bold mb-2  mt-8"> Recurrence: </label>
   <div *ngIf="task" class="grid grid-cols-3 items-top my-auto">
     <div>
       <div class="flex items-center mb-4" *ngFor="let rec of recurrences; let i = index">
-        <input id="recurrence-radio-{{i}}" type="radio" [value]="rec" name="default-radio" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" (click)="changeRecurrence(rec)">
-        <label for="recurrence-radio-{{i}}" class="ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">{{rec.toString()}}</label>
+        <input id="recurrence-radio-{{i}}" type="radio" formControlName="recurrence" [value]="rec" name="recurrence" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" (change)="onChangeRecurrence(rec)" >
+        <label for="recurrence-radio-{{i}}" class="ml-2 text-sm font-medium text-gray-900">{{rec.toString()}}</label>
       </div>
     </div>
     <div class="col-span-2">
-      <div *ngIf="recurrence== recurrences[0]">
+      <div *ngIf="recurrence== recurrences[0]" class=" items-center mb-4">
+        <input id="radio-{{recurrences[0]}}-1" type="radio" name="specialLength" [value]="null" formControlName="specialLength" class="w-4 mb-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" [checked]="taskForm.controls['length'].value != null">
+        <label for="radio-{{recurrences[0]}}-1" class="ml-2 tex-sm font-medium text-gray-900"> Every <input type="number" formControlName="length"  id="daily-number" min="1" max="99" class="text-center bg-gray-200" style="width: 2em;"/> Day(s) </label> <br>
+        <input id="radio-{{recurrences[0]}}-2" type="radio" formControlName="specialLength" name="specialLength" value="WORKDAILY" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+        <label for="radio-{{recurrences[0]}}-2" class="ml-2 text-sm font-medium text-gray-900"> Workdaily </label>
       </div>
       <div *ngIf="recurrence==recurrences[1]">
-        Ballo
+        <label class="ml-2 text-sm font-medium text-gray-900"> Every <input type="number" formControlName="length"  class="text-center bg-gray-200" id="weekly-number" min="1" max="99" style="width: 2em;"/> Week(s) </label> <br>
+        <label class="block text-left mt-4" style="max-width: 300px" >
+          <span class="text-gray-900">On</span>
+          <select multiple class="form-multiselect block w-full mt-1" formControlName="weekday">
+              <option *ngFor="let weekday of weekdays | keyvalue" class="text-gray-900" [ngValue]="weekday.key">{{weekday.value}}</option>
+          </select>
+        </label>
       </div>
       <div *ngIf="recurrence==recurrences[2]">
-        Sallo
+        <label class="ml-2 text-sm font-medium text-gray-900"> Every <input type="number" class="text-center bg-gray-200" formControlName="length" id="monthly-number" min="1" max="99" style="width: 2em;"/> Month(s) </label> <br>
+
+        <input formControlName="selection" [value]="true" type="radio" class="w-4 mt-6 mb-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" (change)="resetSelection()">
+        <label class="ml-2 text-sm font-medium text-gray-900"> On the <input type="number" formControlName="day"  class="text-center bg-gray-200" id="monthly-day" min="1" max="31" style="width: 2em;"/> Day </label> <br>
+        <input formControlName="selection" [value]="false" type="radio" class="w-4 mt-4 mb-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" (change)="resetSelection()">
+
+        <select formControlName="specialLength" style="width: 6em;" class="ml-2 text-black">
+          <option [ngValue]="null" disabled selected>On the</option>
+          <option *ngFor="let special of specialLengths" class="text-gray-900" [ngValue]="special">{{special}}</option>
+        </select>
+        <select formControlName="weekday" style="width: 6em;" class="ml-6 text-black">
+          <option [ngValue]="null" disabled selected>Weekday</option>
+          <option *ngFor="let weekday of weekdays | keyvalue" class="text-gray-900" [ngValue]="weekday.key">{{weekday.value}}</option>
+        </select>
       </div>
       <div *ngIf="recurrence==recurrences[3]">
-        Sallo
+        <label class="ml-2 text-sm font-medium text-gray-900"> Every
+        <select formControlName="month" style="width: 7em" class="ml-2 text-black">
+          <option [ngValue]="null" disabled selected>Month</option>
+          <option *ngFor="let month of months let i = index" class="text-gray-900" [ngValue]="i+1">{{month}}</option>
+        </select>
+        </label> <br>
+
+        <input formControlName="selection"  [value]="true" type="radio" class="w-4 mt-6 mb-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" (change)="resetSelection()">
+        <label class="ml-2 text-sm font-medium text-gray-900"> On the <input type="number" formControlName="day"  class="text-center bg-gray-200" id="yearly-day" min="1" max="31" style="width: 2em;"/> Day </label> <br>
+
+        <input formControlName="selection" [value]="false" type="radio" class="w-4 mb-4 h-4 mt-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" (change)="resetSelection()">
+        <select formControlName="specialLength" style="width: 6em;" class="ml-2 text-black">
+          <option [ngValue]="null" disabled selected>On the</option>
+          <option *ngFor="let special of specialLengths" class="text-gray-900" [ngValue]="special">{{special}}</option>
+        </select>
+        <select formControlName="weekday" style="width: 6em;" class="ml-6 text-black">
+          <option [ngValue]="null" disabled selected>Weekday</option>
+          <option *ngFor="let weekday of weekdays | keyvalue" class="text-gray-900" [ngValue]="weekday.key">{{weekday.value}}</option>
+        </select>
       </div>
     </div>
   </div>
