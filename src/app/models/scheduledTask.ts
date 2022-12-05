@@ -11,7 +11,7 @@ export interface ScheduledTask extends BaseModel {
     repetitions: number | null;
     repetitionsLeft: number | null;
     length: number | null;
-    weekday: number | null;
+    weekdays: number[] | null;
     specialLength: string | null;
     month: number | null;
     day: number | null;

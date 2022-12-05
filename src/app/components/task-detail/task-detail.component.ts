@@ -47,6 +47,7 @@ export class TaskDetailComponent implements OnInit {
         })
 
         this.people = this.responsibilities
+        console.log(this.task)
       })
     })
   }
@@ -105,7 +106,7 @@ export class TaskDetailComponent implements OnInit {
   createResponsibility(): FormGroup {
     return this.formBuilder.group({
       name: '',
-      email: ''
+      email: ['', Validators.email]
     })
   }
 
@@ -140,7 +141,7 @@ export class TaskDetailComponent implements OnInit {
       title: new FormControl(this.task.title, [Validators.required, Validators.maxLength(45)]),
       description: new FormControl(this.task.description),
       isPending: new FormControl({value: this.task.finished, disabled: true}),
-      dueDate: new FormControl(this.task.dueDate!.toISOString().slice(0,16), Validators.required),
+      dueDate: new FormControl((this.task.dueDate!).toISOString().slice(0,16), Validators.required),
       people: this.formBuilder.array([])
     })
   }

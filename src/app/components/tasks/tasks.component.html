@@ -1,21 +1,24 @@
 <div class="overflow-x-auto">
-    <table class="table table-zebra w-full">
+  <div class="overflow-x-auto">
+    <label for="table-search" class="sr-only">Search</label>
+    <div class="relative mt-1 ml-4">
+      <input [(ngModel)]="searchText" type="text" id="table-search" class="block p-2 pl-10 w-80 text-sm text-black rounded-lg  bg-gray-300 focus:outline-none" placeholder="Search for items">
+    </div>
+    <table class="table table-zebra w-full mt-3">
         <thead>
             <tr>
               <th></th>
               <th>Title</th>
-              <th>Description</th>
               <th>Due Date</th>
               <th>Responsible</th>
-              <th>Details</th>
               <th>Other</th>
+              <th></th>
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let task of tasks; index as i" class="hover">
+            <tr *ngFor="let task of tasks | taskFilter:searchText; index as i" class="hover">
                 <td>{{i+1}}</td>
                 <td>{{task.title}}</td>
-                <td>{{task.description}}</td>
                 <td>{{task.dueDate | date:"medium"}}</td>
                 <td>
                   <div *ngFor="let responsibility of task.responsibilities">
@@ -23,9 +26,6 @@
                     <br>
                   </div>
                 </td>
-              <td class="items-center">
-                <button type="button" class="text-white bg-gradient-to-br from-green-700 to-blue-800 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-green-400 dark:focus:ring-green-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2 mb-2">Show Details</button>
-              </td>
                 <td class="space-x-4">
                     <a href="/task/{{task.id}}">
                         <button onclick="" class="btn btn-circle hover:bg-blue-800">
@@ -46,7 +46,21 @@
                     </svg>
 
                   </button>
+
                 </td>
+              <td>
+                <label for="modal-{{i}}" class="btn" *ngIf="task.description">show info</label>
+              </td>
+              <input type="checkbox" id="modal-{{i}}" class="modal-toggle" />
+              <div class="modal">
+                <div class="modal-box">
+                  <h3 class="font-bold text-lg">Description for {{task.title}}</h3>
+                  <markdown class="prose">{{task.description}}</markdown>
+                  <div class="modal-action">
+                    <label for="modal-{{i}}" class="btn">dismiss</label>
+                  </div>
+                </div>
+              </div>
             </tr>
           </tbody>
     </table>
@@ -57,6 +71,8 @@
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-13 h-13">
       <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
     </svg>
-
   </button>
 </a>
+
+
+</div>

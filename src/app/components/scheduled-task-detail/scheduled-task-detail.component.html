@@ -1,4 +1,4 @@
-<div *ngIf="task" class="w-full max-w-xs mx-auto flex flex-col items-center" xmlns="http://www.w3.org/1999/html">
+<div *ngIf="loaded | async" class="w-full max-w-xs mx-auto flex flex-col items-center" xmlns="http://www.w3.org/1999/html">
   <h2 class="text-2xl font-bold tracking-wide text-center">Scheduled Task Editor</h2>
 <form [formGroup]="taskForm"  class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
   <div class="mb-4">
@@ -28,7 +28,7 @@
     <div class="col-span-2">
       <div *ngIf="recurrence== recurrences[0]" class=" items-center mb-4">
         <input id="radio-{{recurrences[0]}}-1" type="radio" name="specialLength" [value]="null" formControlName="specialLength" class="w-4 mb-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" [checked]="taskForm.controls['length'].value != null">
-        <label for="radio-{{recurrences[0]}}-1" class="ml-2 tex-sm font-medium text-gray-900"> Every <input type="number" formControlName="length"  id="daily-number" min="1" max="99" class="text-center bg-gray-200" style="width: 2em;"/> Day(s) </label> <br>
+        <label for="radio-{{recurrences[0]}}-1" class="ml-2 tex-sm font-medium text-gray-900"> Every <input type="number" formControlName="length"  id="daily-number" class="text-center bg-gray-200" style="width: 2em;"/> Day(s) </label> <br>
         <input id="radio-{{recurrences[0]}}-2" type="radio" formControlName="specialLength" name="specialLength" value="WORKDAILY" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
         <label for="radio-{{recurrences[0]}}-2" class="ml-2 text-sm font-medium text-gray-900"> Workdaily </label>
       </div>
@@ -44,38 +44,38 @@
       <div *ngIf="recurrence==recurrences[2]">
         <label class="ml-2 text-sm font-medium text-gray-900"> Every <input type="number" class="text-center bg-gray-200" formControlName="length" id="monthly-number" min="1" max="99" style="width: 2em;"/> Month(s) </label> <br>
 
-        <input formControlName="selection" [value]="true" type="radio" class="w-4 mt-6 mb-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" (change)="resetSelection()">
-        <label class="ml-2 text-sm font-medium text-gray-900"> On the <input type="number" formControlName="day"  class="text-center bg-gray-200" id="monthly-day" min="1" max="31" style="width: 2em;"/> Day </label> <br>
-        <input formControlName="selection" [value]="false" type="radio" class="w-4 mt-4 mb-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" (change)="resetSelection()">
+        <input formControlName="selection" [value]="true" type="radio" class="w-4 mt-6 mb-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" (change)="resetSelectionWeak()">
+        <label class="ml-2 text-sm font-medium text-gray-900"> On the <input *ngIf="taskForm.controls['selection'].value" type="number" formControlName="day"  class="text-center bg-gray-200" id="monthly-day" min="1" max="31" style="width: 2em;"/> Day </label> <br>
+        <input formControlName="selection" [value]="false" type="radio" class="w-4 mt-4 mb-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" (change)="resetSelectionWeak()">
 
         <select formControlName="specialLength" style="width: 6em;" class="ml-2 text-black">
-          <option [ngValue]="null" disabled selected>On the</option>
-          <option *ngFor="let special of specialLengths" class="text-gray-900" [ngValue]="special">{{special}}</option>
+          <option [ngValue]="null" disabled>On the</option>
+          <option *ngFor="let special of specialLengths" class="text-gray-900" [ngValue]="special" [disabled]="taskForm.controls['selection'].value">{{special}}</option>
         </select>
         <select formControlName="weekday" style="width: 6em;" class="ml-6 text-black">
-          <option [ngValue]="null" disabled selected>Weekday</option>
-          <option *ngFor="let weekday of weekdays | keyvalue" class="text-gray-900" [ngValue]="weekday.key">{{weekday.value}}</option>
+          <option disabled [ngValue]="null">Weekday</option>
+          <option *ngFor="let weekday of weekdays | keyvalue" class="text-gray-900" [ngValue]="weekday.key" [disabled]="taskForm.controls['selection'].value">{{weekday.value}}</option>
         </select>
       </div>
       <div *ngIf="recurrence==recurrences[3]">
         <label class="ml-2 text-sm font-medium text-gray-900"> Every
         <select formControlName="month" style="width: 7em" class="ml-2 text-black">
-          <option [ngValue]="null" disabled selected>Month</option>
-          <option *ngFor="let month of months let i = index" class="text-gray-900" [ngValue]="i+1">{{month}}</option>
+          <option disabled selected [ngValue]="null">Month</option>
+          <option *ngFor="let month of months let i = index" class="text-gray-900" [ngValue]="months[i]">{{month}}</option>
         </select>
         </label> <br>
 
-        <input formControlName="selection"  [value]="true" type="radio" class="w-4 mt-6 mb-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" (change)="resetSelection()">
-        <label class="ml-2 text-sm font-medium text-gray-900"> On the <input type="number" formControlName="day"  class="text-center bg-gray-200" id="yearly-day" min="1" max="31" style="width: 2em;"/> Day </label> <br>
+        <input formControlName="selection"  [value]="true" type="radio" class="w-4 mt-6 mb-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" (change)="resetSelectionWeak()">
+        <label class="ml-2 text-sm font-medium text-gray-900"> On the <input *ngIf="taskForm.controls['selection'].value" type="number" formControlName="day"  class="text-center bg-gray-200" id="yearly-day" min="1" max="31" style="width: 2em;"/> Day </label> <br>
 
-        <input formControlName="selection" [value]="false" type="radio" class="w-4 mb-4 h-4 mt-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" (change)="resetSelection()">
-        <select formControlName="specialLength" style="width: 6em;" class="ml-2 text-black">
-          <option [ngValue]="null" disabled selected>On the</option>
-          <option *ngFor="let special of specialLengths" class="text-gray-900" [ngValue]="special">{{special}}</option>
+        <input formControlName="selection" [value]="false" type="radio" class="w-4 mb-4 h-4 mt-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" (change)="resetSelectionWeak()">
+        <select formControlName="specialLength" style="width: 6em;" class="ml-2 text-black" >
+          <option disabled selected [ngValue]="null">On the</option>
+          <option *ngFor="let special of specialLengths" class="text-gray-900" [ngValue]="special" [disabled]="taskForm.controls['selection'].value">{{special}}</option>
         </select>
         <select formControlName="weekday" style="width: 6em;" class="ml-6 text-black">
-          <option [ngValue]="null" disabled selected>Weekday</option>
-          <option *ngFor="let weekday of weekdays | keyvalue" class="text-gray-900" [ngValue]="weekday.key">{{weekday.value}}</option>
+          <option disabled [ngValue]="null">Weekday</option>
+          <option *ngFor="let weekday of weekdays | keyvalue" class="text-gray-900" [ngValue]="weekday.key" [disabled]="taskForm.controls['selection'].value">{{weekday.value}}</option>
         </select>
       </div>
     </div>
@@ -93,10 +93,14 @@
         </div>
       </ng-container>
     </div>
-    <div class="flex justify-center mt-6">
+    <div class="flex flex-col items-center mt-6">
       <button class="flex-shrink-0 bg-teal-500 hover:bg-teal-700 border-teal-500 hover:border-teal-700 text-sm border-4 text-white py-1 px-2 rounded" (click)="addResponsibility()">
         Add
       </button>
+      <button (click)="onSubmit()" [disabled]="!taskForm.valid" class="mt-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-4 px-6 rounded-full relative">Submit!</button>
+    </div>
+    <div *ngIf="!taskForm.valid" class="mt-4 bg-red-100 border border-red-400 text-red-700 px-1 py-1 rounded relative" role="alert">
+      Some parts of the form are invalid or missing!
     </div>
   </div>
 </form>
